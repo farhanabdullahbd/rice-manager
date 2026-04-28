@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f3f4f6;
+    margin: 0;
+  }
+  #root {
+    text-align: left;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer inline-flex items-center gap-1;
+  }
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+  .btn-outline {
+    @apply border border-gray-300 text-gray-700 hover:bg-gray-100 bg-white;
+  }
+  .input {
+    @apply w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-sm p-4;
+  }
+  .badge-paid { @apply bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full; }
+  .badge-due { @apply bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full; }
+  .badge-partial { @apply bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full; }
+}
