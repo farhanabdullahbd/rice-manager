@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -24,19 +24,13 @@ model Branch {
   payments   Payment[]
 }
 
-enum Role {
-  super_admin
-  branch_manager
-  cashier
-}
-
 model User {
   id           Int      @id @default(autoincrement())
   branchId     Int?
   name         String
   email        String   @unique
   passwordHash String
-  role         Role     @default(cashier)
+  role         String   @default("cashier")
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
 
@@ -54,23 +48,14 @@ model Category {
   products    Product[]
 }
 
-enum Unit {
-  kg
-  piece
-  bag
-  liter
-  ton
-  box
-}
-
 model Product {
-  id            Int     @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   categoryId    Int?
   name          String
-  sku           String  @unique
-  unit          Unit    @default(piece)
-  purchasePrice Decimal @db.Decimal(10, 2)
-  sellingPrice  Decimal @db.Decimal(10, 2)
+  sku           String   @unique
+  unit          String   @default("piece")
+  purchasePrice Float
+  sellingPrice  Float
   createdAt     DateTime @default(now())
 
   category      Category?      @relation(fields: [categoryId], references: [id])
@@ -80,12 +65,12 @@ model Product {
 }
 
 model Inventory {
-  id             Int      @id @default(autoincrement())
-  branchId       Int
-  productId      Int
-  quantity       Decimal  @default(0) @db.Decimal(10, 3)
-  minStockAlert  Decimal  @default(5) @db.Decimal(10, 3)
-  updatedAt      DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  branchId      Int
+  productId     Int
+  quantity      Float    @default(0)
+  minStockAlert Float    @default(5)
+  updatedAt     DateTime @updatedAt
 
   branch  Branch  @relation(fields: [branchId], references: [id])
   product Product @relation(fields: [productId], references: [id])
@@ -99,8 +84,8 @@ model Customer {
   name           String
   phone          String?
   address        String?
-  creditLimit    Decimal  @default(0) @db.Decimal(10, 2)
-  currentBalance Decimal  @default(0) @db.Decimal(10, 2)
+  creditLimit    Float    @default(0)
+  currentBalance Float    @default(0)
   createdAt      DateTime @default(now())
 
   branch   Branch    @relation(fields: [branchId], references: [id])
@@ -117,36 +102,21 @@ model Supplier {
   purchases Purchase[]
 }
 
-enum PaymentMethod {
-  cash
-  credit
-  bkash
-  nagad
-  card
-  bank
-}
-
-enum SaleStatus {
-  paid
-  partial
-  due
-}
-
 model Sale {
-  id            Int           @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   branchId      Int
   customerId    Int?
   userId        Int
-  invoiceNo     String        @unique
-  subtotal      Decimal       @db.Decimal(10, 2)
-  discount      Decimal       @default(0) @db.Decimal(10, 2)
-  totalAmount   Decimal       @db.Decimal(10, 2)
-  paidAmount    Decimal       @default(0) @db.Decimal(10, 2)
-  dueAmount     Decimal       @default(0) @db.Decimal(10, 2)
-  paymentMethod PaymentMethod @default(cash)
-  status        SaleStatus    @default(paid)
+  invoiceNo     String   @unique
+  subtotal      Float
+  discount      Float    @default(0)
+  totalAmount   Float
+  paidAmount    Float    @default(0)
+  dueAmount     Float    @default(0)
+  paymentMethod String   @default("cash")
+  status        String   @default("paid")
   notes         String?
-  createdAt     DateTime      @default(now())
+  createdAt     DateTime @default(now())
 
   branch   Branch    @relation(fields: [branchId], references: [id])
   customer Customer? @relation(fields: [customerId], references: [id])
@@ -156,31 +126,31 @@ model Sale {
 }
 
 model SaleItem {
-  id         Int     @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   saleId     Int
   productId  Int
-  quantity   Decimal @db.Decimal(10, 3)
-  unitPrice  Decimal @db.Decimal(10, 2)
-  discount   Decimal @default(0) @db.Decimal(10, 2)
-  totalPrice Decimal @db.Decimal(10, 2)
+  quantity   Float
+  unitPrice  Float
+  discount   Float @default(0)
+  totalPrice Float
 
   sale    Sale    @relation(fields: [saleId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 }
 
 model Purchase {
-  id            Int           @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   branchId      Int
   supplierId    Int?
   userId        Int
   invoiceNo     String?
-  subtotal      Decimal       @db.Decimal(10, 2)
-  discount      Decimal       @default(0) @db.Decimal(10, 2)
-  totalAmount   Decimal       @db.Decimal(10, 2)
-  paidAmount    Decimal       @default(0) @db.Decimal(10, 2)
-  dueAmount     Decimal       @default(0) @db.Decimal(10, 2)
-  paymentMethod PaymentMethod @default(cash)
-  date          DateTime      @default(now())
+  subtotal      Float
+  discount      Float    @default(0)
+  totalAmount   Float
+  paidAmount    Float    @default(0)
+  dueAmount     Float    @default(0)
+  paymentMethod String   @default("cash")
+  date          DateTime @default(now())
   notes         String?
 
   branch   Branch    @relation(fields: [branchId], references: [id])
@@ -190,26 +160,26 @@ model Purchase {
 }
 
 model PurchaseItem {
-  id         Int     @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   purchaseId Int
   productId  Int
-  quantity   Decimal @db.Decimal(10, 3)
-  unitPrice  Decimal @db.Decimal(10, 2)
-  totalPrice Decimal @db.Decimal(10, 2)
+  quantity   Float
+  unitPrice  Float
+  totalPrice Float
 
   purchase Purchase @relation(fields: [purchaseId], references: [id])
   product  Product  @relation(fields: [productId], references: [id])
 }
 
 model Payment {
-  id            Int           @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   saleId        Int?
   customerId    Int
   branchId      Int
   userId        Int
-  amount        Decimal       @db.Decimal(10, 2)
-  paymentMethod PaymentMethod @default(cash)
-  date          DateTime      @default(now())
+  amount        Float
+  paymentMethod String   @default("cash")
+  date          DateTime @default(now())
   notes         String?
 
   sale     Sale?    @relation(fields: [saleId], references: [id])
@@ -218,23 +188,14 @@ model Payment {
   user     User     @relation(fields: [userId], references: [id])
 }
 
-enum ExpenseCategory {
-  rent
-  salary
-  utility
-  transport
-  maintenance
-  other
-}
-
 model Expense {
-  id          Int             @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   branchId    Int
   userId      Int
-  category    ExpenseCategory @default(other)
-  amount      Decimal         @db.Decimal(10, 2)
+  category    String   @default("other")
+  amount      Float
   description String?
-  date        DateTime        @default(now())
+  date        DateTime @default(now())
 
   branch Branch @relation(fields: [branchId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
