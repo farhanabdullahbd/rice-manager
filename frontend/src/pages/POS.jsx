@@ -46,7 +46,7 @@ function Invoice({ sale, forwardRef }) {
         <div className="flex justify-between"><span>পরিশোধ:</span><span>৳{Number(sale.paidAmount)}</span></div>
         {Number(sale.dueAmount) > 0 && <div className="flex justify-between font-bold text-red-600"><span>বাকি:</span><span>৳{Number(sale.dueAmount)}</span></div>}
       </div>
-      <p className="text-center text-xs text-gray-400 mt-4 text-black">ধন্যবাদ! আবার আসবেন ✦</p>
+      <p className="text-center text-xs text-gray-400 mt-4">ধন্যবাদ! আবার আসবেন ✦</p>
     </div>
   );
 }
@@ -56,23 +56,21 @@ function QRScanner({ onScan, onClose }) {
 
   useEffect(() => {
     const scanner = new Html5QrcodeScanner('qr-scanner', {
-      fps: 10, qrbox: { width: 250, height: 250 }, rememberLastUsedCamera: true,
+      fps: 10, qrbox: { width: 220, height: 220 }, rememberLastUsedCamera: true,
     });
     scanner.render(
       (text) => { onScan(text); scanner.clear(); onClose(); },
-      (err) => {}
+      () => {}
     );
     scannerRef.current = scanner;
     return () => { scanner.clear().catch(() => {}); };
   }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50"
-      style={{ background: 'rgba(0,0,0,0.9)' }}>
-      <div className="rounded-2xl p-6 w-full max-w-sm"
-        style={{ background: 'linear-gradient(135deg, #2d0009, #1a0005)', border: '1px solid #d4af37' }}>
-        <h3 className="font-bold text-lg mb-4 text-center" style={{ color: '#d4af37' }}>📱 QR কোড স্ক্যান</h3>
-        <div id="qr-scanner" className="rounded-xl overflow-hidden" />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-3xl p-5 w-full max-w-sm shadow-2xl">
+        <h3 className="font-bold text-gray-900 text-center mb-4">📱 QR কোড স্ক্যান</h3>
+        <div id="qr-scanner" className="rounded-2xl overflow-hidden" />
         <button onClick={onClose} className="btn btn-outline w-full justify-center mt-4">বাতিল</button>
       </div>
     </div>
@@ -92,6 +90,7 @@ export default function POS() {
   const [lastSale, setLastSale] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [mobileTab, setMobileTab] = useState('products'); // 'products' | 'cart'
   const invoiceRef = useRef();
 
   useEffect(() => {
@@ -149,137 +148,164 @@ export default function POS() {
       });
       const full = await api.get(`/sales/${data.id}`);
       setLastSale(full.data);
-      toast.success('✅ বিক্রয় সম্পন্ন!');
+      toast.success('বিক্রয় সম্পন্ন!');
       setCart([]); setDiscount(0); setPaidAmount(''); setCustomerId('');
+      setMobileTab('products');
       setTimeout(() => handlePrint(), 300);
     } catch (err) {
       toast.error(err.response?.data?.message || 'বিক্রয় ব্যর্থ');
     } finally { setLoading(false); }
   };
 
+  // ── Product Panel ──
+  const ProductPanel = (
+    <div className="flex flex-col gap-3 h-full">
+      <div className="flex gap-2">
+        <input className="input flex-1" placeholder="🔍 পণ্য খুঁজুন..."
+          value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button onClick={() => setShowScanner(true)} className="btn btn-primary shrink-0">
+          📱 QR
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5 overflow-y-auto flex-1">
+        {filtered.map((p) => (
+          <button key={p.id} onClick={() => { addToCart(p); setMobileTab('cart'); }}
+            className="text-left p-3 rounded-2xl bg-white border transition-all active:scale-95 hover:border-orange-200 hover:shadow-sm"
+            style={{ border: '1px solid #F3F4F6' }}>
+            <p className="font-semibold text-sm text-gray-900 truncate">{p.name}</p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">{p.sku} · {p.unit}</p>
+            <p className="font-bold text-base text-orange-500 mt-1.5">৳{Number(p.sellingPrice)}</p>
+          </button>
+        ))}
+        {filtered.length === 0 && (
+          <div className="col-span-2 text-center py-10 text-gray-400">কোনো পণ্য পাওয়া যায়নি</div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── Cart Panel ──
+  const CartPanel = (
+    <div className="flex flex-col gap-3 h-full">
+      <select className="input text-sm" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
+        <option value="">-- কাস্টমার (ঐচ্ছিক) --</option>
+        {customers.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>)}
+      </select>
+
+      <div className="flex-1 overflow-y-auto space-y-2">
+        {cart.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-4xl mb-2">🛒</p>
+            <p className="text-sm text-gray-400">কার্ট খালি</p>
+          </div>
+        )}
+        {cart.map((item, idx) => (
+          <div key={idx} className="bg-gray-50 rounded-2xl p-3" style={{ border: '1px solid #F3F4F6' }}>
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm font-semibold text-gray-900">{item.name}</span>
+              <button onClick={() => removeFromCart(idx)} className="text-red-400 text-sm hover:text-red-600">✕</button>
+            </div>
+            <div className="flex gap-2">
+              <input type="number" min="0.1" step="0.1" value={item.quantity}
+                onChange={(e) => updateCartItem(idx, 'quantity', e.target.value)}
+                className="input w-16 text-xs py-1.5 text-center" />
+              <input type="number" min="0" value={item.unitPrice}
+                onChange={(e) => updateCartItem(idx, 'unitPrice', e.target.value)}
+                className="input flex-1 text-xs py-1.5" placeholder="মূল্য" />
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-xs text-gray-500">
+                ছাড়: <input type="number" min="0" value={item.discount}
+                  onChange={(e) => updateCartItem(idx, 'discount', e.target.value)}
+                  className="w-14 text-xs text-center rounded-lg px-1 py-0.5 ml-1 border border-gray-200 bg-white" />
+              </span>
+              <span className="font-bold text-sm text-orange-500">
+                ৳{(item.quantity * item.unitPrice - item.discount).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Payment */}
+      <div className="bg-white rounded-2xl p-3 space-y-2.5 shrink-0" style={{ border: '1px solid #F3F4F6' }}>
+        <div className="flex justify-between text-xs text-gray-500">
+          <span>সাবটোটাল</span><span>৳{subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500 shrink-0">ছাড় (৳)</span>
+          <input type="number" min="0" value={discount} onChange={(e) => setDiscount(e.target.value)}
+            className="input py-1.5 text-xs" />
+        </div>
+        <div className="flex justify-between font-bold text-base pt-1.5" style={{ borderTop: '1px solid #F3F4F6' }}>
+          <span className="text-gray-900">মোট</span>
+          <span className="text-orange-500">৳{total.toFixed(2)}</span>
+        </div>
+        <select className="input text-sm" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+          <option value="cash">💵 নগদ</option>
+          <option value="bkash">📱 বিকাশ</option>
+          <option value="nagad">📱 নগদ মোবাইল</option>
+          <option value="card">💳 কার্ড</option>
+          <option value="credit">📒 বাকি</option>
+        </select>
+        <input type="number" min="0" placeholder={`পরিশোধ (৳${total.toFixed(2)})`}
+          value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} className="input text-sm" />
+        {change > 0 && <p className="text-xs font-semibold text-green-600">ফেরত: ৳{change.toFixed(2)}</p>}
+        {due > 0 && <p className="text-xs font-semibold text-red-500">বাকি: ৳{due.toFixed(2)}</p>}
+        <button onClick={handleSell} disabled={loading || cart.length === 0}
+          className="w-full py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
+          style={{
+            background: loading || cart.length === 0
+              ? '#F3F4F6'
+              : 'linear-gradient(135deg, #F97316, #EA580C)',
+            color: loading || cart.length === 0 ? '#9CA3AF' : '#FFFFFF',
+          }}>
+          {loading ? '⏳ প্রক্রিয়া হচ্ছে...' : `✅ বিক্রয় সম্পন্ন (${cart.length} টি পণ্য)`}
+        </button>
+        {lastSale && (
+          <button onClick={handlePrint} className="btn btn-outline w-full justify-center text-xs">
+            🖨️ রশিদ প্রিন্ট
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="flex gap-4 h-[calc(100vh-48px)]">
-      {/* Product panel */}
-      <div className="flex-1 flex flex-col gap-3 min-w-0">
-        <div className="flex gap-2">
-          <input className="input flex-1" placeholder="🔍 পণ্য খুঁজুন (নাম / SKU)..."
-            value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button onClick={() => setShowScanner(true)} className="btn btn-gold shrink-0" title="QR স্ক্যান করুন">
-            📱 QR স্ক্যান
+    <>
+      {/* ── Desktop Layout ── */}
+      <div className="hidden lg:flex gap-4" style={{ height: 'calc(100vh - 96px)' }}>
+        <div className="flex-1 flex flex-col gap-3 min-w-0">{ProductPanel}</div>
+        <div className="w-80 flex flex-col gap-3 shrink-0">{CartPanel}</div>
+      </div>
+
+      {/* ── Mobile Layout (tab-based) ── */}
+      <div className="lg:hidden flex flex-col" style={{ height: 'calc(100svh - 130px)' }}>
+        {/* Tabs */}
+        <div className="flex gap-1 mb-3 bg-gray-100 p-1 rounded-2xl">
+          <button onClick={() => setMobileTab('products')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+              mobileTab === 'products' ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
+            }`}>
+            পণ্য ({filtered.length})
+          </button>
+          <button onClick={() => setMobileTab('cart')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+              mobileTab === 'cart' ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
+            }`}>
+            কার্ট {cart.length > 0 && `(${cart.length})`}
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto flex-1 pr-1">
-          {filtered.map((p) => (
-            <button key={p.id} onClick={() => addToCart(p)}
-              className="text-left p-3 rounded-xl transition-all cursor-pointer"
-              style={{
-                background: 'linear-gradient(135deg, #2d0009, #1a0005)',
-                border: '1px solid #4a0012',
-              }}
-              onMouseOver={e => e.currentTarget.style.borderColor = '#d4af37'}
-              onMouseOut={e => e.currentTarget.style.borderColor = '#4a0012'}>
-              <p className="font-medium text-sm truncate" style={{ color: '#f5e6e0' }}>{p.name}</p>
-              <p className="text-xs mt-0.5" style={{ color: '#c9a0a0' }}>{p.sku} · {p.unit}</p>
-              <p className="font-bold mt-2 text-base" style={{ color: '#d4af37' }}>৳{Number(p.sellingPrice)}</p>
-            </button>
-          ))}
+        <div className="flex-1 overflow-hidden">
+          {mobileTab === 'products' ? ProductPanel : CartPanel}
         </div>
       </div>
 
-      {/* Cart panel */}
-      <div className="w-80 flex flex-col gap-3 shrink-0">
-        <div className="card flex-1 flex flex-col overflow-hidden">
-          <h3 className="font-bold mb-3" style={{ color: '#d4af37' }}>🛒 কার্ট</h3>
-          <select className="input mb-3 text-sm" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
-            <option value="">-- কাস্টমার (ঐচ্ছিক) --</option>
-            {customers.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>)}
-          </select>
-
-          <div className="flex-1 overflow-y-auto space-y-2">
-            {cart.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-4xl mb-2">🛒</p>
-                <p className="text-sm" style={{ color: '#c9a0a0' }}>কার্ট খালি</p>
-              </div>
-            )}
-            {cart.map((item, idx) => (
-              <div key={idx} className="p-2.5 rounded-lg" style={{ background: '#1a0005', border: '1px solid #4a0012' }}>
-                <div className="flex justify-between items-start mb-1.5">
-                  <span className="text-xs font-medium" style={{ color: '#f5e6e0' }}>{item.name}</span>
-                  <button onClick={() => removeFromCart(idx)} style={{ color: '#f87171' }} className="text-xs hover:opacity-70">✕</button>
-                </div>
-                <div className="flex gap-1.5">
-                  <input type="number" min="0.1" step="0.1" value={item.quantity}
-                    onChange={(e) => updateCartItem(idx, 'quantity', e.target.value)}
-                    className="input w-16 text-xs py-1" />
-                  <input type="number" min="0" value={item.unitPrice}
-                    onChange={(e) => updateCartItem(idx, 'unitPrice', e.target.value)}
-                    className="input flex-1 text-xs py-1" />
-                </div>
-                <div className="flex justify-between items-center mt-1.5">
-                  <span className="text-xs" style={{ color: '#c9a0a0' }}>
-                    ছাড়: <input type="number" min="0" value={item.discount}
-                      onChange={(e) => updateCartItem(idx, 'discount', e.target.value)}
-                      className="w-12 text-xs text-center rounded px-1 py-0.5 ml-1"
-                      style={{ background: '#2d0009', border: '1px solid #4a0012', color: '#f5e6e0' }} />
-                  </span>
-                  <span className="font-bold text-sm" style={{ color: '#d4af37' }}>
-                    ৳{(item.quantity * item.unitPrice - item.discount).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Payment */}
-        <div className="card space-y-2.5 text-sm shrink-0">
-          <div className="flex justify-between text-xs" style={{ color: '#c9a0a0' }}>
-            <span>সাবটোটাল:</span><span>৳{subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs shrink-0" style={{ color: '#c9a0a0' }}>ছাড় (৳):</span>
-            <input type="number" min="0" value={discount} onChange={(e) => setDiscount(e.target.value)} className="input py-1 text-xs" />
-          </div>
-          <div className="flex justify-between font-bold text-base pt-1" style={{ borderTop: '1px solid #4a0012' }}>
-            <span style={{ color: '#f5e6e0' }}>মোট:</span>
-            <span style={{ color: '#d4af37' }}>৳{total.toFixed(2)}</span>
-          </div>
-          <select className="input text-sm" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="cash">💵 নগদ</option>
-            <option value="bkash">📱 বিকাশ</option>
-            <option value="nagad">📱 নগদ মোবাইল</option>
-            <option value="card">💳 কার্ড</option>
-            <option value="credit">📒 বাকি</option>
-          </select>
-          <input type="number" min="0" placeholder={`পরিশোধ (৳${total.toFixed(2)})`}
-            value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} className="input text-sm" />
-          {change > 0 && <p className="text-xs font-medium" style={{ color: '#4ade80' }}>ফেরত: ৳{change.toFixed(2)}</p>}
-          {due > 0 && <p className="text-xs font-medium" style={{ color: '#f87171' }}>বাকি: ৳{due.toFixed(2)}</p>}
-
-          <button onClick={handleSell} disabled={loading || cart.length === 0}
-            className="w-full py-3 rounded-xl font-bold text-sm transition-all shadow-lg"
-            style={{
-              background: loading || cart.length === 0 ? '#2d0009' : 'linear-gradient(135deg, #d4af37, #b8962e)',
-              color: loading || cart.length === 0 ? '#c9a0a0' : '#1a0005',
-              border: '1px solid #d4af37'
-            }}>
-            {loading ? '⏳ প্রক্রিয়া হচ্ছে...' : '✅ বিক্রয় সম্পন্ন করুন'}
-          </button>
-          {lastSale && (
-            <button onClick={handlePrint} className="btn btn-outline w-full justify-center text-xs">
-              🖨️ রশিদ প্রিন্ট
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Hidden invoice */}
+      {/* Hidden invoice for print */}
       <div className="hidden"><Invoice sale={lastSale} forwardRef={invoiceRef} /></div>
 
-      {/* QR Scanner */}
       {showScanner && <QRScanner onScan={handleQRScan} onClose={() => setShowScanner(false)} />}
-    </div>
+    </>
   );
 }

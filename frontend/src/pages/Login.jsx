@@ -24,60 +24,44 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #1a0005 0%, #2d0009 50%, #1a0005 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: 'linear-gradient(160deg, #FFF8F5 0%, #FFEDD5 50%, #FFF7ED 100%)' }}>
 
-      {/* Decorative circles */}
-      <div className="absolute w-96 h-96 rounded-full opacity-10 -top-20 -left-20"
-        style={{ background: 'radial-gradient(circle, #8b0022, transparent)' }} />
-      <div className="absolute w-64 h-64 rounded-full opacity-10 -bottom-10 -right-10"
-        style={{ background: 'radial-gradient(circle, #d4af37, transparent)' }} />
-
-      <div className="relative w-full max-w-sm mx-4">
-        {/* Card */}
-        <div className="rounded-2xl p-8 shadow-2xl"
-          style={{
-            background: 'linear-gradient(135deg, #2d0009, #1a0005)',
-            border: '1px solid #d4af37',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.1)'
-          }}>
-
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-xl"
-              style={{ background: 'linear-gradient(135deg, #8b0022, #4a0012)', border: '2px solid #d4af37' }}>
-              🛒
-            </div>
-            <h1 className="text-2xl font-bold" style={{ color: '#d4af37' }}>POS সিস্টেম</h1>
-            <p className="text-sm mt-1" style={{ color: '#c9a0a0' }}>আপনার অ্যাকাউন্টে লগইন করুন</p>
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg"
+            style={{ background: 'linear-gradient(135deg, #F97316, #EA580C)' }}>
+            🛒
           </div>
+          <h1 className="text-2xl font-bold text-gray-900">POS সিস্টেম</h1>
+          <p className="text-sm text-gray-500 mt-1">আপনার অ্যাকাউন্টে লগইন করুন</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Card */}
+        <div className="bg-white rounded-3xl p-6 shadow-xl" style={{ border: '1px solid #F3F4F6' }}>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#d4af37' }}>
-                ইমেইল
-              </label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">ইমেইল</label>
               <input className="input" type="email" value={email}
                 onChange={(e) => setEmail(e.target.value)} required placeholder="admin@pos.com" />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#d4af37' }}>
-                পাসওয়ার্ড
-              </label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">পাসওয়ার্ড</label>
               <input className="input" type="password" value={password}
                 onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" />
             </div>
             <button type="submit" disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-sm transition-all mt-2 shadow-lg"
-              style={{
-                background: loading ? '#4a0012' : 'linear-gradient(135deg, #d4af37, #b8962e)',
-                color: loading ? '#c9a0a0' : '#1a0005',
-                border: '1px solid #d4af37'
-              }}>
-              {loading ? 'অপেক্ষা করুন...' : '✦ লগইন করুন'}
+              className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all shadow-md active:scale-95"
+              style={{ background: loading ? '#D1D5DB' : 'linear-gradient(135deg, #F97316, #EA580C)' }}>
+              {loading ? 'লগইন হচ্ছে...' : 'লগইন করুন →'}
             </button>
           </form>
         </div>
+
+        <p className="text-center text-xs text-gray-400 mt-6">
+          admin@pos.com · admin123
+        </p>
       </div>
     </div>
   );

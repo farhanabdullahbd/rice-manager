@@ -2,19 +2,16 @@ import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
-function StatCard({ label, value, icon, color }) {
+function StatCard({ label, value, icon, bg }) {
   return (
-    <div className="stat-card">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wider mb-1" style={{ color: '#c9a0a0' }}>{label}</p>
-          <p className="text-2xl font-bold mt-1" style={{ color: '#d4af37' }}>
-            ৳{Number(value || 0).toLocaleString()}
-          </p>
+    <div className="bg-white rounded-2xl p-4 shadow-sm" style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style={{ background: bg }}>
+          {icon}
         </div>
-        <div className="text-2xl opacity-80">{icon}</div>
       </div>
-      <div className="mt-3 h-0.5 rounded-full" style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
+      <p className="text-xl font-bold text-gray-900">৳{Number(value || 0).toLocaleString()}</p>
     </div>
   );
 }
@@ -42,99 +39,76 @@ export default function Dashboard() {
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
+    <div className="flex items-center justify-center h-48">
       <div className="text-center">
-        <div className="text-4xl mb-3">⏳</div>
-        <p style={{ color: '#c9a0a0' }}>লোড হচ্ছে...</p>
+        <div className="text-3xl mb-2 animate-pulse">📊</div>
+        <p className="text-sm text-gray-500">লোড হচ্ছে...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: '#d4af37' }}>ড্যাশবোর্ড</h2>
-          <p className="text-sm mt-0.5" style={{ color: '#c9a0a0' }}>
-            {new Date().toLocaleDateString('bn-BD', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
-        <div className="text-3xl">📊</div>
+    <div className="space-y-5">
+      <div>
+        <h2 className="page-header">ড্যাশবোর্ড</h2>
+        <p className="page-sub">
+          {new Date().toLocaleDateString('bn-BD', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="আজকের বিক্রয়" value={summary?.totalSales} icon="💰" color="#d4af37" />
-        <StatCard label="নগদ আদায়" value={summary?.totalPaidAmount} icon="✅" color="#16a34a" />
-        <StatCard label="মোট বাকি" value={summary?.totalDueAmount} icon="⚠️" color="#dc2626" />
-        <StatCard label="নিট লাভ" value={summary?.netProfit} icon="📈" color="#a855f7" />
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard label="আজকের বিক্রয়" value={summary?.totalSales} icon="💰" bg="#FFF7ED" />
+        <StatCard label="নগদ আদায়" value={summary?.totalPaidAmount} icon="✅" bg="#F0FDF4" />
+        <StatCard label="মোট বাকি" value={summary?.totalDueAmount} icon="⚠️" bg="#FEF2F2" />
+        <StatCard label="নিট লাভ" value={summary?.netProfit} icon="📈" bg="#FAF5FF" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Low Stock */}
         <div className="card">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">⚠️</span>
-            <h3 className="font-semibold" style={{ color: '#d4af37' }}>কম স্টক পণ্য</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">⚠️</div>
+            <h3 className="font-semibold text-gray-800">কম স্টক পণ্য</h3>
           </div>
           {lowStock.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-3xl mb-2">✅</p>
-              <p className="text-sm" style={{ color: '#c9a0a0' }}>সব পণ্যের স্টক ঠিক আছে</p>
+            <div className="text-center py-5">
+              <p className="text-2xl mb-1">✅</p>
+              <p className="text-sm text-gray-500">সব পণ্যের স্টক ঠিক আছে</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr>
-                  <th className="table-header text-left">পণ্য</th>
-                  <th className="table-header text-right">স্টক</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lowStock.map((i) => (
-                  <tr key={i.id} className="table-row">
-                    <td className="py-2.5" style={{ color: '#f5e6e0' }}>{i.product.name}</td>
-                    <td className="py-2.5 text-right font-medium" style={{ color: '#f87171' }}>
-                      {Number(i.quantity)} {i.product.unit}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="space-y-2">
+              {lowStock.map((i) => (
+                <div key={i.id} className="flex items-center justify-between py-2"
+                  style={{ borderBottom: '1px solid #F9FAFB' }}>
+                  <span className="text-sm text-gray-800">{i.product.name}</span>
+                  <span className="tag text-red-600 bg-red-50">{Number(i.quantity)} {i.product.unit}</span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Customer Dues */}
         <div className="card">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">💳</span>
-            <h3 className="font-semibold" style={{ color: '#d4af37' }}>বাকির তালিকা</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center">💳</div>
+            <h3 className="font-semibold text-gray-800">বাকির তালিকা</h3>
           </div>
           {dues.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-3xl mb-2">🎉</p>
-              <p className="text-sm" style={{ color: '#c9a0a0' }}>কোনো বাকি নেই</p>
+            <div className="text-center py-5">
+              <p className="text-2xl mb-1">🎉</p>
+              <p className="text-sm text-gray-500">কোনো বাকি নেই</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr>
-                  <th className="table-header text-left">কাস্টমার</th>
-                  <th className="table-header text-right">বাকি</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dues.map((c) => (
-                  <tr key={c.id} className="table-row">
-                    <td className="py-2.5" style={{ color: '#f5e6e0' }}>{c.name}</td>
-                    <td className="py-2.5 text-right font-bold" style={{ color: '#f87171' }}>
-                      ৳{Number(c.currentBalance).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="space-y-2">
+              {dues.map((c) => (
+                <div key={c.id} className="flex items-center justify-between py-2"
+                  style={{ borderBottom: '1px solid #F9FAFB' }}>
+                  <span className="text-sm text-gray-800">{c.name}</span>
+                  <span className="font-semibold text-red-600 text-sm">৳{Number(c.currentBalance).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

@@ -3,20 +3,16 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
 
-function StatCard({ label, value, icon, color }) {
+function StatCard({ label, value, icon, bg }) {
   return (
-    <div className="stat-card">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wider mb-1" style={{ color: '#c9a0a0' }}>{label}</p>
-          <p className="text-xl font-bold mt-1" style={{ color: '#d4af37' }}>
-            ৳{Number(value || 0).toLocaleString()}
-          </p>
+    <div className="bg-white rounded-2xl p-4 shadow-sm" style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base" style={{ background: bg }}>
+          {icon}
         </div>
-        <div className="text-xl opacity-70">{icon}</div>
       </div>
-      <div className="mt-3 h-0.5 rounded-full"
-        style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
+      <p className="text-lg font-bold text-gray-900">৳{Number(value || 0).toLocaleString()}</p>
     </div>
   );
 }
@@ -50,166 +46,123 @@ export default function Reports() {
       }
     } catch {
       toast.error('রিপোর্ট লোড ব্যর্থ');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Header + date filter */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: '#d4af37' }}>রিপোর্ট</h2>
-          <p className="text-sm mt-0.5" style={{ color: '#c9a0a0' }}>তারিখ ভিত্তিক বিশ্লেষণ</p>
-        </div>
-        <div className="flex items-center gap-2 ml-auto flex-wrap">
-          <input type="date" className="input w-36" value={from} onChange={(e) => setFrom(e.target.value)} />
-          <span style={{ color: '#6b0019' }}>—</span>
-          <input type="date" className="input w-36" value={to} onChange={(e) => setTo(e.target.value)} />
-          <button onClick={load} disabled={loading} className="btn btn-gold">
-            {loading ? 'লোড...' : '📊 দেখুন'}
-          </button>
-        </div>
+    <div className="space-y-5">
+      <div>
+        <h2 className="page-header">রিপোর্ট</h2>
+        <p className="page-sub">তারিখ ভিত্তিক বিশ্লেষণ</p>
+      </div>
+
+      {/* Date filter */}
+      <div className="card flex items-center gap-2 flex-wrap">
+        <input type="date" className="input flex-1 min-w-0" value={from} onChange={(e) => setFrom(e.target.value)} />
+        <span className="text-gray-400 shrink-0">—</span>
+        <input type="date" className="input flex-1 min-w-0" value={to} onChange={(e) => setTo(e.target.value)} />
+        <button onClick={load} disabled={loading} className="btn btn-primary shrink-0">
+          {loading ? '...' : '📊 দেখুন'}
+        </button>
       </div>
 
       {summary && (
         <>
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="মোট বিক্রয়" value={summary.totalSales} icon="💰" color="#d4af37" />
-            <StatCard label="নগদ আদায়" value={summary.totalPaidAmount} icon="✅" color="#16a34a" />
-            <StatCard label="মোট বাকি" value={summary.totalDueAmount} icon="⚠️" color="#dc2626" />
-            <StatCard label="মোট ছাড়" value={summary.totalDiscount} icon="🏷️" color="#eab308" />
-            <StatCard label="ক্রয় ব্যয়" value={summary.totalPurchase} icon="🚚" color="#f97316" />
-            <StatCard label="COGS (ক্রয়মূল্য)" value={summary.cogs} icon="📦" color="#fb923c" />
-            <StatCard label="গ্রস লাভ" value={summary.grossProfit} icon="📈" color="#a855f7" />
-            <StatCard label="নিট লাভ" value={summary.netProfit} icon="🏆" color="#10b981" />
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard label="মোট বিক্রয়" value={summary.totalSales} icon="💰" bg="#FFF7ED" />
+            <StatCard label="নগদ আদায়" value={summary.totalPaidAmount} icon="✅" bg="#F0FDF4" />
+            <StatCard label="মোট বাকি" value={summary.totalDueAmount} icon="⚠️" bg="#FEF2F2" />
+            <StatCard label="মোট ছাড়" value={summary.totalDiscount} icon="🏷️" bg="#FEFCE8" />
+            <StatCard label="ক্রয় ব্যয়" value={summary.totalPurchase} icon="🚚" bg="#FFF7ED" />
+            <StatCard label="COGS" value={summary.cogs} icon="📦" bg="#FFF7ED" />
+            <StatCard label="গ্রস লাভ" value={summary.grossProfit} icon="📈" bg="#FAF5FF" />
+            <StatCard label="নিট লাভ" value={summary.netProfit} icon="🏆" bg="#F0FDF4" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Top products */}
-            <div className="card">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">🏆</span>
-                <h3 className="font-semibold" style={{ color: '#d4af37' }}>সর্বোচ্চ বিক্রিত পণ্য</h3>
-              </div>
-              {topProducts.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-2xl mb-2">📦</p>
-                  <p className="text-sm" style={{ color: '#c9a0a0' }}>এই সময়ে কোনো বিক্রয় নেই</p>
-                </div>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr>
-                      <th className="table-header text-left">#</th>
-                      <th className="table-header text-left">পণ্য</th>
-                      <th className="table-header text-right">পরিমাণ</th>
-                      <th className="table-header text-right">বিক্রয়</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topProducts.map((p, i) => (
-                      <tr key={i} className="table-row">
-                        <td className="py-2.5 font-bold" style={{ color: '#d4af37' }}>{i + 1}</td>
-                        <td className="py-2.5" style={{ color: '#f5e6e0' }}>{p.product?.name}</td>
-                        <td className="py-2.5 text-right" style={{ color: '#c9a0a0' }}>
-                          {Number(p._sum.quantity)} {p.product?.unit}
-                        </td>
-                        <td className="py-2.5 text-right font-bold" style={{ color: '#d4af37' }}>
-                          ৳{Number(p._sum.totalPrice).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+          {/* Top products */}
+          <div className="card">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center">🏆</div>
+              <h3 className="font-semibold text-gray-800">সর্বোচ্চ বিক্রিত পণ্য</h3>
             </div>
+            {topProducts.length === 0 ? (
+              <p className="text-sm text-gray-400 py-3 text-center">এই সময়ে কোনো বিক্রয় নেই</p>
+            ) : (
+              <div className="space-y-2">
+                {topProducts.map((p, i) => (
+                  <div key={i} className="flex items-center justify-between py-2"
+                    style={{ borderBottom: '1px solid #F9FAFB' }}>
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{p.product?.name}</p>
+                        <p className="text-xs text-gray-400">{Number(p._sum.quantity)} {p.product?.unit}</p>
+                      </div>
+                    </div>
+                    <span className="font-bold text-orange-500 text-sm">
+                      ৳{Number(p._sum.totalPrice).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-            {/* Customer dues */}
-            <div className="card">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">💳</span>
-                <h3 className="font-semibold" style={{ color: '#d4af37' }}>বাকির তালিকা</h3>
-              </div>
-              {dues.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-2xl mb-2">🎉</p>
-                  <p className="text-sm" style={{ color: '#c9a0a0' }}>কোনো বাকি নেই</p>
-                </div>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr>
-                      <th className="table-header text-left">কাস্টমার</th>
-                      <th className="table-header text-left">মোবাইল</th>
-                      <th className="table-header text-right">বাকি</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dues.map((c) => (
-                      <tr key={c.id} className="table-row">
-                        <td className="py-2.5" style={{ color: '#f5e6e0' }}>{c.name}</td>
-                        <td className="py-2.5" style={{ color: '#c9a0a0' }}>{c.phone || '—'}</td>
-                        <td className="py-2.5 text-right font-bold" style={{ color: '#f87171' }}>
-                          ৳{Number(c.currentBalance).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+          {/* Customer dues */}
+          <div className="card">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center">💳</div>
+              <h3 className="font-semibold text-gray-800">বাকির তালিকা</h3>
             </div>
+            {dues.length === 0 ? (
+              <p className="text-sm text-gray-400 py-3 text-center">কোনো বাকি নেই 🎉</p>
+            ) : (
+              <div className="space-y-2">
+                {dues.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between py-2"
+                    style={{ borderBottom: '1px solid #F9FAFB' }}>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{c.name}</p>
+                      <p className="text-xs text-gray-400">{c.phone || '—'}</p>
+                    </div>
+                    <span className="font-bold text-red-500 text-sm">
+                      ৳{Number(c.currentBalance).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Branch comparison — super_admin only */}
           {user?.role === 'super_admin' && branchReport.length > 0 && (
             <div className="card">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">🏢</span>
-                <h3 className="font-semibold" style={{ color: '#d4af37' }}>শাখাভিত্তিক বিক্রয়</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">🏢</div>
+                <h3 className="font-semibold text-gray-800">শাখাভিত্তিক বিক্রয়</h3>
               </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr>
-                    <th className="table-header text-left">শাখা</th>
-                    <th className="table-header text-right">বিক্রয়</th>
-                    <th className="table-header text-right">আদায়</th>
-                    <th className="table-header text-right">বাকি</th>
-                    <th className="table-header text-center">লেনদেন</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {branchReport.map((b) => (
-                    <tr key={b.branch.id} className="table-row">
-                      <td className="py-3 font-medium" style={{ color: '#f5e6e0' }}>{b.branch.name}</td>
-                      <td className="py-3 text-right font-bold" style={{ color: '#d4af37' }}>
-                        ৳{Number(b.totalSales).toLocaleString()}
-                      </td>
-                      <td className="py-3 text-right" style={{ color: '#4ade80' }}>
-                        ৳{Number(b.totalPaid).toLocaleString()}
-                      </td>
-                      <td className="py-3 text-right" style={{ color: '#f87171' }}>
-                        ৳{Number(b.totalDue).toLocaleString()}
-                      </td>
-                      <td className="py-3 text-center" style={{ color: '#c9a0a0' }}>{b.salesCount} টি</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="space-y-2">
+                {branchReport.map((b) => (
+                  <div key={b.branch.id} className="py-2" style={{ borderBottom: '1px solid #F9FAFB' }}>
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-gray-900 text-sm">{b.branch.name}</p>
+                      <p className="font-bold text-orange-500 text-sm">৳{Number(b.totalSales).toLocaleString()}</p>
+                    </div>
+                    <div className="flex gap-4 mt-1 text-xs">
+                      <span className="text-green-600">আদায় ৳{Number(b.totalPaid).toLocaleString()}</span>
+                      <span className="text-red-500">বাকি ৳{Number(b.totalDue).toLocaleString()}</span>
+                      <span className="text-gray-400">{b.salesCount} টি</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </>
-      )}
-
-      {!summary && !loading && (
-        <div className="text-center py-16">
-          <p className="text-4xl mb-3">📊</p>
-          <p style={{ color: '#c9a0a0' }}>তারিখ নির্বাচন করে "দেখুন" বাটনে চাপুন</p>
-        </div>
       )}
     </div>
   );
