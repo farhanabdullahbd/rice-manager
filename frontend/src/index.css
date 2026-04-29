@@ -1,39 +1,136 @@
 @import "tailwindcss";
 
+@theme {
+  --color-maroon-950: #1a0005;
+  --color-maroon-900: #2d0009;
+  --color-maroon-800: #4a0012;
+  --color-maroon-700: #6b0019;
+  --color-maroon-600: #8b0022;
+  --color-maroon-500: #a80029;
+  --color-maroon-400: #cc1a3a;
+  --color-gold-400: #d4af37;
+  --color-gold-300: #e8c84a;
+  --color-gold-200: #f0d97a;
+  --color-cream-100: #fdf5f0;
+  --color-cream-200: #f5e6e0;
+}
+
 @layer base {
   body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #f3f4f6;
+    background-color: #1a0005;
+    color: #f5e6e0;
     margin: 0;
   }
-  #root {
-    text-align: left;
-  }
+  #root { text-align: left; }
 }
 
 @layer components {
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer inline-flex items-center gap-1;
+    @apply px-4 py-2 rounded-lg font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 text-sm;
   }
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+    background: linear-gradient(135deg, #8b0022, #6b0019);
+    @apply text-white shadow-lg hover:shadow-maroon-800/50;
+    border: 1px solid #a80029;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #a80029, #8b0022);
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #d4af37, #b8962e);
+    @apply text-maroon-950 font-semibold shadow-lg;
+    border: 1px solid #e8c84a;
+  }
+  .btn-gold:hover {
+    background: linear-gradient(135deg, #e8c84a, #d4af37);
   }
   .btn-success {
-    @apply bg-green-600 text-white hover:bg-green-700;
+    background: linear-gradient(135deg, #166534, #14532d);
+    @apply text-white shadow-lg;
+    border: 1px solid #16a34a;
   }
+  .btn-success:hover { background: linear-gradient(135deg, #16a34a, #166534); }
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700;
+    background: linear-gradient(135deg, #991b1b, #7f1d1d);
+    @apply text-white;
+    border: 1px solid #dc2626;
   }
   .btn-outline {
-    @apply border border-gray-300 text-gray-700 hover:bg-gray-100 bg-white;
+    background: transparent;
+    border: 1px solid #6b0019;
+    @apply text-cream-200 hover:bg-maroon-800;
   }
+
   .input {
-    @apply w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400;
+    @apply w-full rounded-lg px-3 py-2 text-sm focus:outline-none transition-all;
+    background: #2d0009;
+    border: 1px solid #6b0019;
+    color: #f5e6e0;
   }
+  .input:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+  }
+  .input::placeholder { color: #a07070; }
+
   .card {
-    @apply bg-white rounded-xl shadow-sm p-4;
+    background: linear-gradient(135deg, #2d0009, #1a0005);
+    border: 1px solid #4a0012;
+    @apply rounded-xl p-4 shadow-xl;
   }
-  .badge-paid { @apply bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full; }
-  .badge-due { @apply bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full; }
-  .badge-partial { @apply bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full; }
+  .card-gold {
+    background: linear-gradient(135deg, #2d0009, #1a0005);
+    border: 1px solid #d4af37;
+    @apply rounded-xl p-4 shadow-xl;
+  }
+
+  .badge-paid {
+    @apply bg-green-900/50 text-green-300 text-xs px-2 py-0.5 rounded-full border border-green-700;
+  }
+  .badge-due {
+    @apply bg-red-900/50 text-red-300 text-xs px-2 py-0.5 rounded-full border border-red-700;
+  }
+  .badge-partial {
+    @apply bg-yellow-900/50 text-yellow-300 text-xs px-2 py-0.5 rounded-full border border-yellow-700;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-2.5 text-sm transition-all;
+    color: #c9a0a0;
+  }
+  .sidebar-link:hover {
+    background: rgba(139, 0, 34, 0.4);
+    color: #d4af37;
+  }
+  .sidebar-link.active {
+    background: linear-gradient(90deg, #8b0022, #6b0019);
+    color: #d4af37;
+    border-right: 3px solid #d4af37;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #2d0009, #1a0005);
+    border: 1px solid #4a0012;
+    @apply rounded-xl p-5 shadow-xl relative overflow-hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(212,175,55,0.1), transparent);
+    border-radius: 50%;
+  }
+
+  .table-row {
+    border-bottom: 1px solid #2d0009;
+    @apply transition-colors;
+  }
+  .table-row:hover { background: rgba(139, 0, 34, 0.2); }
+  .table-header {
+    color: #d4af37;
+    @apply text-xs uppercase tracking-wider pb-3;
+    border-bottom: 1px solid #4a0012;
+  }
 }

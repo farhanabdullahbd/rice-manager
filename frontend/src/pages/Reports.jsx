@@ -3,11 +3,20 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
 
-function StatCard({ label, value, color = 'border-blue-500', prefix = '৳' }) {
+function StatCard({ label, value, icon, color }) {
   return (
-    <div className={`card border-l-4 ${color}`}>
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-xl font-bold text-gray-800 mt-0.5">{prefix}{Number(value || 0).toLocaleString()}</p>
+    <div className="stat-card">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-wider mb-1" style={{ color: '#c9a0a0' }}>{label}</p>
+          <p className="text-xl font-bold mt-1" style={{ color: '#d4af37' }}>
+            ৳{Number(value || 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="text-xl opacity-70">{icon}</div>
+      </div>
+      <div className="mt-3 h-0.5 rounded-full"
+        style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
     </div>
   );
 }
@@ -50,42 +59,69 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
+      {/* Header + date filter */}
       <div className="flex items-center gap-4 flex-wrap">
-        <h2 className="text-xl font-bold text-gray-800">রিপোর্ট</h2>
-        <div className="flex items-center gap-2 ml-auto">
+        <div>
+          <h2 className="text-2xl font-bold" style={{ color: '#d4af37' }}>রিপোর্ট</h2>
+          <p className="text-sm mt-0.5" style={{ color: '#c9a0a0' }}>তারিখ ভিত্তিক বিশ্লেষণ</p>
+        </div>
+        <div className="flex items-center gap-2 ml-auto flex-wrap">
           <input type="date" className="input w-36" value={from} onChange={(e) => setFrom(e.target.value)} />
-          <span className="text-gray-500">—</span>
+          <span style={{ color: '#6b0019' }}>—</span>
           <input type="date" className="input w-36" value={to} onChange={(e) => setTo(e.target.value)} />
-          <button onClick={load} disabled={loading} className="btn btn-primary">{loading ? 'লোড...' : 'দেখুন'}</button>
+          <button onClick={load} disabled={loading} className="btn btn-gold">
+            {loading ? 'লোড...' : '📊 দেখুন'}
+          </button>
         </div>
       </div>
 
       {summary && (
         <>
+          {/* Stats grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="মোট বিক্রয়" value={summary.totalSales} color="border-blue-500" />
-            <StatCard label="নগদ আদায়" value={summary.totalPaidAmount} color="border-green-500" />
-            <StatCard label="মোট বাকি" value={summary.totalDueAmount} color="border-red-500" />
-            <StatCard label="মোট ছাড়" value={summary.totalDiscount} color="border-yellow-500" />
-            <StatCard label="ক্রয় ব্যয়" value={summary.totalPurchase} color="border-orange-500" />
-            <StatCard label="পণ্যের ক্রয়মূল্য (COGS)" value={summary.cogs} color="border-orange-400" />
-            <StatCard label="গ্রস লাভ" value={summary.grossProfit} color="border-purple-500" />
-            <StatCard label="নিট লাভ" value={summary.netProfit} color="border-emerald-500" />
+            <StatCard label="মোট বিক্রয়" value={summary.totalSales} icon="💰" color="#d4af37" />
+            <StatCard label="নগদ আদায়" value={summary.totalPaidAmount} icon="✅" color="#16a34a" />
+            <StatCard label="মোট বাকি" value={summary.totalDueAmount} icon="⚠️" color="#dc2626" />
+            <StatCard label="মোট ছাড়" value={summary.totalDiscount} icon="🏷️" color="#eab308" />
+            <StatCard label="ক্রয় ব্যয়" value={summary.totalPurchase} icon="🚚" color="#f97316" />
+            <StatCard label="COGS (ক্রয়মূল্য)" value={summary.cogs} icon="📦" color="#fb923c" />
+            <StatCard label="গ্রস লাভ" value={summary.grossProfit} icon="📈" color="#a855f7" />
+            <StatCard label="নিট লাভ" value={summary.netProfit} icon="🏆" color="#10b981" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top products */}
             <div className="card">
-              <h3 className="font-semibold text-gray-700 mb-3">🏆 সর্বোচ্চ বিক্রিত পণ্য</h3>
-              {topProducts.length === 0 ? <p className="text-sm text-gray-400">তথ্য নেই</p> : (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">🏆</span>
+                <h3 className="font-semibold" style={{ color: '#d4af37' }}>সর্বোচ্চ বিক্রিত পণ্য</h3>
+              </div>
+              {topProducts.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-2xl mb-2">📦</p>
+                  <p className="text-sm" style={{ color: '#c9a0a0' }}>এই সময়ে কোনো বিক্রয় নেই</p>
+                </div>
+              ) : (
                 <table className="w-full text-sm">
-                  <thead><tr className="text-left text-gray-500 border-b"><th className="pb-1">পণ্য</th><th className="pb-1">পরিমাণ</th><th className="pb-1">বিক্রয়</th></tr></thead>
+                  <thead>
+                    <tr>
+                      <th className="table-header text-left">#</th>
+                      <th className="table-header text-left">পণ্য</th>
+                      <th className="table-header text-right">পরিমাণ</th>
+                      <th className="table-header text-right">বিক্রয়</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {topProducts.map((p, i) => (
-                      <tr key={i} className="border-b last:border-0">
-                        <td className="py-1.5">{p.product?.name}</td>
-                        <td className="py-1.5">{Number(p._sum.quantity)} {p.product?.unit}</td>
-                        <td className="py-1.5 font-medium text-blue-700">৳{Number(p._sum.totalPrice).toLocaleString()}</td>
+                      <tr key={i} className="table-row">
+                        <td className="py-2.5 font-bold" style={{ color: '#d4af37' }}>{i + 1}</td>
+                        <td className="py-2.5" style={{ color: '#f5e6e0' }}>{p.product?.name}</td>
+                        <td className="py-2.5 text-right" style={{ color: '#c9a0a0' }}>
+                          {Number(p._sum.quantity)} {p.product?.unit}
+                        </td>
+                        <td className="py-2.5 text-right font-bold" style={{ color: '#d4af37' }}>
+                          ৳{Number(p._sum.totalPrice).toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -95,16 +131,32 @@ export default function Reports() {
 
             {/* Customer dues */}
             <div className="card">
-              <h3 className="font-semibold text-gray-700 mb-3">💳 বাকির তালিকা</h3>
-              {dues.length === 0 ? <p className="text-sm text-gray-400">কোনো বাকি নেই</p> : (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">💳</span>
+                <h3 className="font-semibold" style={{ color: '#d4af37' }}>বাকির তালিকা</h3>
+              </div>
+              {dues.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-2xl mb-2">🎉</p>
+                  <p className="text-sm" style={{ color: '#c9a0a0' }}>কোনো বাকি নেই</p>
+                </div>
+              ) : (
                 <table className="w-full text-sm">
-                  <thead><tr className="text-left text-gray-500 border-b"><th className="pb-1">কাস্টমার</th><th className="pb-1">মোবাইল</th><th className="pb-1">বাকি</th></tr></thead>
+                  <thead>
+                    <tr>
+                      <th className="table-header text-left">কাস্টমার</th>
+                      <th className="table-header text-left">মোবাইল</th>
+                      <th className="table-header text-right">বাকি</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {dues.map((c) => (
-                      <tr key={c.id} className="border-b last:border-0">
-                        <td className="py-1.5">{c.name}</td>
-                        <td className="py-1.5 text-gray-500">{c.phone || '—'}</td>
-                        <td className="py-1.5 font-medium text-red-600">৳{Number(c.currentBalance).toLocaleString()}</td>
+                      <tr key={c.id} className="table-row">
+                        <td className="py-2.5" style={{ color: '#f5e6e0' }}>{c.name}</td>
+                        <td className="py-2.5" style={{ color: '#c9a0a0' }}>{c.phone || '—'}</td>
+                        <td className="py-2.5 text-right font-bold" style={{ color: '#f87171' }}>
+                          ৳{Number(c.currentBalance).toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -116,21 +168,34 @@ export default function Reports() {
           {/* Branch comparison — super_admin only */}
           {user?.role === 'super_admin' && branchReport.length > 0 && (
             <div className="card">
-              <h3 className="font-semibold text-gray-700 mb-3">🏢 শাখাভিত্তিক বিক্রয়</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl">🏢</span>
+                <h3 className="font-semibold" style={{ color: '#d4af37' }}>শাখাভিত্তিক বিক্রয়</h3>
+              </div>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-gray-500 border-b">
-                    <th className="pb-2">শাখা</th><th className="pb-2">বিক্রয়</th><th className="pb-2">আদায়</th><th className="pb-2">বাকি</th><th className="pb-2">লেনদেন</th>
+                  <tr>
+                    <th className="table-header text-left">শাখা</th>
+                    <th className="table-header text-right">বিক্রয়</th>
+                    <th className="table-header text-right">আদায়</th>
+                    <th className="table-header text-right">বাকি</th>
+                    <th className="table-header text-center">লেনদেন</th>
                   </tr>
                 </thead>
                 <tbody>
                   {branchReport.map((b) => (
-                    <tr key={b.branch.id} className="border-b last:border-0">
-                      <td className="py-2 font-medium">{b.branch.name}</td>
-                      <td className="py-2">৳{Number(b.totalSales).toLocaleString()}</td>
-                      <td className="py-2 text-green-600">৳{Number(b.totalPaid).toLocaleString()}</td>
-                      <td className="py-2 text-red-600">৳{Number(b.totalDue).toLocaleString()}</td>
-                      <td className="py-2 text-gray-500">{b.salesCount} টি</td>
+                    <tr key={b.branch.id} className="table-row">
+                      <td className="py-3 font-medium" style={{ color: '#f5e6e0' }}>{b.branch.name}</td>
+                      <td className="py-3 text-right font-bold" style={{ color: '#d4af37' }}>
+                        ৳{Number(b.totalSales).toLocaleString()}
+                      </td>
+                      <td className="py-3 text-right" style={{ color: '#4ade80' }}>
+                        ৳{Number(b.totalPaid).toLocaleString()}
+                      </td>
+                      <td className="py-3 text-right" style={{ color: '#f87171' }}>
+                        ৳{Number(b.totalDue).toLocaleString()}
+                      </td>
+                      <td className="py-3 text-center" style={{ color: '#c9a0a0' }}>{b.salesCount} টি</td>
                     </tr>
                   ))}
                 </tbody>
@@ -138,6 +203,13 @@ export default function Reports() {
             </div>
           )}
         </>
+      )}
+
+      {!summary && !loading && (
+        <div className="text-center py-16">
+          <p className="text-4xl mb-3">📊</p>
+          <p style={{ color: '#c9a0a0' }}>তারিখ নির্বাচন করে "দেখুন" বাটনে চাপুন</p>
+        </div>
       )}
     </div>
   );

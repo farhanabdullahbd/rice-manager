@@ -22,16 +22,29 @@ function CustomerModal({ customer, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="card w-full max-w-sm">
-        <h3 className="font-semibold mb-4">{customer ? 'কাস্টমার সম্পাদনা' : 'নতুন কাস্টমার'}</h3>
+    <div className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ background: 'rgba(0,0,0,0.8)' }}>
+      <div className="rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+        style={{ background: 'linear-gradient(135deg, #2d0009, #1a0005)', border: '1px solid #d4af37' }}>
+        <h3 className="font-bold text-lg mb-5" style={{ color: '#d4af37' }}>
+          {customer ? '✏️ কাস্টমার সম্পাদনা' : '✦ নতুন কাস্টমার'}
+        </h3>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input className="input" placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <input className="input" placeholder="মোবাইল নম্বর" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <input className="input" placeholder="ঠিকানা" value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-          <input className="input" type="number" placeholder="ক্রেডিট সীমা (৳)" value={form.creditLimit} onChange={(e) => setForm({ ...form, creditLimit: e.target.value })} />
-          <div className="flex gap-2">
-            <button type="submit" disabled={loading} className="btn btn-primary flex-1 justify-center">{loading ? 'সংরক্ষণ...' : 'সংরক্ষণ'}</button>
+          <input className="input" placeholder="নাম *"
+            value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          <input className="input" placeholder="মোবাইল নম্বর"
+            value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input className="input" placeholder="ঠিকানা"
+            value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <div>
+            <label className="text-xs mb-1 block" style={{ color: '#d4af37' }}>ক্রেডিট সীমা (৳)</label>
+            <input className="input" type="number" placeholder="0"
+              value={form.creditLimit} onChange={(e) => setForm({ ...form, creditLimit: e.target.value })} />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button type="submit" disabled={loading} className="btn btn-gold flex-1 justify-center">
+              {loading ? 'সংরক্ষণ...' : '✦ সংরক্ষণ করুন'}
+            </button>
             <button type="button" onClick={onClose} className="btn btn-outline flex-1 justify-center">বাতিল</button>
           </div>
         </form>
@@ -60,18 +73,33 @@ function PaymentModal({ customer, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="card w-full max-w-sm">
-        <h3 className="font-semibold mb-1">বাকি পরিশোধ</h3>
-        <p className="text-sm text-gray-500 mb-4">{customer.name} — বাকি: ৳{Number(customer.currentBalance).toLocaleString()}</p>
+    <div className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ background: 'rgba(0,0,0,0.8)' }}>
+      <div className="rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+        style={{ background: 'linear-gradient(135deg, #2d0009, #1a0005)', border: '1px solid #d4af37' }}>
+        <h3 className="font-bold text-lg mb-1" style={{ color: '#d4af37' }}>💳 বাকি পরিশোধ</h3>
+        <p className="text-sm mb-5" style={{ color: '#c9a0a0' }}>
+          {customer.name} — বাকি:{' '}
+          <span style={{ color: '#f87171', fontWeight: 'bold' }}>৳{Number(customer.currentBalance).toLocaleString()}</span>
+        </p>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input className="input" type="number" placeholder="পরিমাণ *" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <div>
+            <label className="text-xs mb-1 block" style={{ color: '#d4af37' }}>পরিমাণ (৳)</label>
+            <input className="input" type="number" placeholder="0"
+              value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          </div>
           <select className="input" value={method} onChange={(e) => setMethod(e.target.value)}>
-            <option value="cash">নগদ</option><option value="bkash">বিকাশ</option>
-            <option value="nagad">নগদ মোবাইল</option><option value="card">কার্ড</option>
+            <option value="cash">নগদ</option>
+            <option value="bkash">বিকাশ</option>
+            <option value="nagad">নগদ মোবাইল</option>
+            <option value="card">কার্ড</option>
           </select>
-          <div className="flex gap-2">
-            <button type="submit" disabled={loading} className="btn btn-success flex-1 justify-center">{loading ? '...' : 'গ্রহণ করুন'}</button>
+          <div className="flex gap-2 pt-2">
+            <button type="submit" disabled={loading}
+              className="btn flex-1 justify-center font-semibold"
+              style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)', color: '#fff', border: '1px solid #16a34a' }}>
+              {loading ? '...' : '✓ গ্রহণ করুন'}
+            </button>
             <button type="button" onClick={onClose} className="btn btn-outline flex-1 justify-center">বাতিল</button>
           </div>
         </form>
@@ -93,47 +121,87 @@ export default function Customers() {
     c.name.toLowerCase().includes(search.toLowerCase()) || (c.phone || '').includes(search)
   );
 
+  const totalDue = customers.reduce((sum, c) => sum + Math.max(0, Number(c.currentBalance)), 0);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-800">কাস্টমার তালিকা</h2>
-        <button onClick={() => setModal({})} className="btn btn-primary">+ নতুন কাস্টমার</button>
+        <div>
+          <h2 className="text-2xl font-bold" style={{ color: '#d4af37' }}>কাস্টমার তালিকা</h2>
+          <p className="text-sm mt-0.5" style={{ color: '#c9a0a0' }}>
+            {customers.length} জন কাস্টমার
+            {totalDue > 0 && (
+              <span className="ml-2" style={{ color: '#f87171' }}>
+                — মোট বাকি: ৳{totalDue.toLocaleString()}
+              </span>
+            )}
+          </p>
+        </div>
+        <button onClick={() => setModal({})} className="btn btn-gold">✦ নতুন কাস্টমার</button>
       </div>
-      <input className="input max-w-sm" placeholder="নাম বা মোবাইল দিয়ে খুঁজুন..." value={search} onChange={(e) => setSearch(e.target.value)} />
+
+      <input className="input max-w-sm" placeholder="🔍 নাম বা মোবাইল দিয়ে খুঁজুন..."
+        value={search} onChange={(e) => setSearch(e.target.value)} />
+
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b">
-              <th className="pb-2">নাম</th><th className="pb-2">মোবাইল</th><th className="pb-2">ঠিকানা</th>
-              <th className="pb-2">ক্রেডিট সীমা</th><th className="pb-2 text-red-600">বাকি</th><th className="pb-2"></th>
+            <tr>
+              <th className="table-header text-left">নাম</th>
+              <th className="table-header text-left">মোবাইল</th>
+              <th className="table-header text-left">ঠিকানা</th>
+              <th className="table-header text-right">ক্রেডিট সীমা</th>
+              <th className="table-header text-right">বাকি</th>
+              <th className="table-header text-center">কাজ</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((c) => (
-              <tr key={c.id} className="border-b last:border-0 hover:bg-gray-50">
-                <td className="py-2 font-medium">{c.name}</td>
-                <td className="py-2 text-gray-500">{c.phone || '—'}</td>
-                <td className="py-2 text-gray-500">{c.address || '—'}</td>
-                <td className="py-2">৳{Number(c.creditLimit).toLocaleString()}</td>
-                <td className={`py-2 font-medium ${Number(c.currentBalance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <tr key={c.id} className="table-row">
+                <td className="py-3 font-medium" style={{ color: '#f5e6e0' }}>{c.name}</td>
+                <td className="py-3" style={{ color: '#c9a0a0' }}>{c.phone || '—'}</td>
+                <td className="py-3" style={{ color: '#c9a0a0' }}>{c.address || '—'}</td>
+                <td className="py-3 text-right" style={{ color: '#c9a0a0' }}>৳{Number(c.creditLimit).toLocaleString()}</td>
+                <td className="py-3 text-right font-bold"
+                  style={{ color: Number(c.currentBalance) > 0 ? '#f87171' : '#4ade80' }}>
                   ৳{Number(c.currentBalance).toLocaleString()}
                 </td>
-                <td className="py-2 flex gap-2">
-                  {Number(c.currentBalance) > 0 && (
-                    <button onClick={() => setPayModal(c)} className="text-green-600 hover:text-green-800 text-xs">পরিশোধ</button>
-                  )}
-                  <button onClick={() => setModal(c)} className="text-blue-500 hover:text-blue-700 text-xs">সম্পাদনা</button>
+                <td className="py-3 text-center">
+                  <div className="flex gap-2 justify-center">
+                    {Number(c.currentBalance) > 0 && (
+                      <button onClick={() => setPayModal(c)}
+                        className="text-xs px-2 py-1 rounded-lg transition-all"
+                        style={{ background: 'rgba(22,163,74,0.15)', color: '#4ade80', border: '1px solid rgba(22,163,74,0.3)' }}>
+                        💳 পরিশোধ
+                      </button>
+                    )}
+                    <button onClick={() => setModal(c)}
+                      className="text-xs px-2 py-1 rounded-lg transition-all"
+                      style={{ background: '#2d0009', color: '#c9a0a0', border: '1px solid #4a0012' }}>
+                      ✏️ সম্পাদনা
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && <p className="text-center py-6 text-gray-400">কোনো কাস্টমার পাওয়া যায়নি</p>}
+        {filtered.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-3xl mb-2">👤</p>
+            <p style={{ color: '#c9a0a0' }}>কোনো কাস্টমার পাওয়া যায়নি</p>
+          </div>
+        )}
       </div>
+
       {modal !== null && (
-        <CustomerModal customer={modal?.id ? modal : null} onClose={() => setModal(null)} onSave={() => { setModal(null); load(); }} />
+        <CustomerModal customer={modal?.id ? modal : null}
+          onClose={() => setModal(null)} onSave={() => { setModal(null); load(); }} />
       )}
-      {payModal && <PaymentModal customer={payModal} onClose={() => setPayModal(null)} onSave={() => { setPayModal(null); load(); }} />}
+      {payModal && (
+        <PaymentModal customer={payModal}
+          onClose={() => setPayModal(null)} onSave={() => { setPayModal(null); load(); }} />
+      )}
     </div>
   );
 }
