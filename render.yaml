@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: pos-system
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && node prisma/seed.js
+    startCommand: node src/app.js
+    envVars:
+      - key: DATABASE_URL
+        value: file:./prisma/pos.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
