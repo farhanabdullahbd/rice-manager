@@ -3,22 +3,22 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import {
   HomeIcon, ShoppingCartIcon, CubeIcon, UsersIcon,
-  ChartBarIcon, ArrowRightOnRectangleIcon, BuildingStorefrontIcon,
-  TruckIcon, BanknotesIcon, Bars3Icon, XMarkIcon,
+  ChartBarIcon, ArrowRightOnRectangleIcon, BanknotesIcon,
+  Bars3Icon, XMarkIcon, UserGroupIcon, BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
 
 const navItems = [
   { to: '/', label: 'ড্যাশবোর্ড', icon: HomeIcon, roles: ['super_admin', 'branch_manager', 'cashier'] },
   { to: '/pos', label: 'বিক্রয়', icon: ShoppingCartIcon, roles: ['super_admin', 'branch_manager', 'cashier'] },
-  { to: '/products', label: 'পণ্য', icon: CubeIcon, roles: ['super_admin', 'branch_manager'] },
-  { to: '/inventory', label: 'স্টক', icon: BuildingStorefrontIcon, roles: ['super_admin', 'branch_manager'] },
+  { to: '/products', label: 'পণ্য ও স্টক', icon: CubeIcon, roles: ['super_admin', 'branch_manager'] },
   { to: '/customers', label: 'কাস্টমার', icon: UsersIcon, roles: ['super_admin', 'branch_manager', 'cashier'] },
-  { to: '/purchases', label: 'মাল কেনা', icon: TruckIcon, roles: ['super_admin', 'branch_manager'] },
   { to: '/expenses', label: 'খরচ', icon: BanknotesIcon, roles: ['super_admin', 'branch_manager'] },
   { to: '/reports', label: 'রিপোর্ট', icon: ChartBarIcon, roles: ['super_admin', 'branch_manager'] },
+  { to: '/users', label: 'ইউজার', icon: UserGroupIcon, roles: ['super_admin', 'branch_manager'] },
+  { to: '/branches', label: 'শাখা', icon: BuildingOffice2Icon, roles: ['super_admin'] },
 ];
 
-const bottomPrimary = ['/', '/pos', '/customers', '/reports'];
+const bottomPrimary = ['/', '/pos', '/products', '/customers'];
 
 export default function Layout({ children }) {
   const { user, logout } = useAuthStore();
@@ -145,7 +145,7 @@ export default function Layout({ children }) {
             onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid #F3F4F6' }}>
-              <p className="font-semibold text-gray-800">মেনু</p>
+              <p className="font-semibold text-gray-800">আরো অপশন</p>
               <button onClick={() => setDrawerOpen(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
                 <XMarkIcon className="w-4 h-4" />

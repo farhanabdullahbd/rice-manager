@@ -6,11 +6,11 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import POS from './pages/POS';
 import Products from './pages/Products';
-import Inventory from './pages/Inventory';
 import Customers from './pages/Customers';
-import Purchases from './pages/Purchases';
 import Expenses from './pages/Expenses';
 import Reports from './pages/Reports';
+import Users from './pages/Users';
+import Branches from './pages/Branches';
 
 export default function App() {
   return (
@@ -27,11 +27,11 @@ export default function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/pos" element={<POS />} />
                   <Route path="/products" element={<Products />} />
-                  <Route path="/inventory" element={<Inventory />} />
                   <Route path="/customers" element={<Customers />} />
-                  <Route path="/purchases" element={<Purchases />} />
                   <Route path="/expenses" element={<Expenses />} />
                   <Route path="/reports" element={<Reports />} />
+                  <Route path="/users" element={<Users />} />
+                  <Route path="/branches" element={<Branches />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </Layout>
